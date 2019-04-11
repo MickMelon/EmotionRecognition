@@ -1,7 +1,7 @@
 import cv2 as cv
 import glob
 
-emotions = ["neutral", "angry", "sad", "happy", "fear", "surprise", "disgust"]
+emotions = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
 
 faceDet = cv.CascadeClassifier("haarcascade_frontalface_default.xml")
 
@@ -13,7 +13,8 @@ def detect_face(file):
     frame = cv.imread(file)
     gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-    face = faceDet.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=10, minSize=(5, 5), flags=cv.CASCADE_SCALE_IMAGE)
+    face = faceDet.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=6, minSize=(30, 30), flags=cv.CASCADE_SCALE_IMAGE)
+    print(face)
 
     if len(face) == 1:
         return face, gray
@@ -21,9 +22,9 @@ def detect_face(file):
     print("No face detected")
     return "", ""
 
-def process(folder):
+def process(sourcefolder, targetfolder):
     for emotion in emotions:
-        images = load_images(folder, emotion)
+        images = load_images(sourcefolder, emotion)
         if len(images) == 0:
             print("No files could be found for %s" %emotion)
         fileNumber = 0
@@ -33,7 +34,7 @@ def process(folder):
                 gray = gray[y:y+h, x:x+w]
                 try:
                     out = cv.resize(gray, (150, 150))
-                    cv.imwrite("dataset/%s/%s.jpg" %(emotion, fileNumber), out)
+                    cv.imwrite("%s/%s/%s.jpg" %(targetfolder, emotion, fileNumber), out)
                 except:
                     print("EXCEPTION OCCURED")
                     pass

@@ -1,7 +1,7 @@
 import cv2 as cv
 
-emotions = ["neutral", "angry", "sad", "happy", "disgust", "fear", "surprise"]
-fishface = cv.face.FisherFaceRecognizer_create()
+emotions = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
+fishface = cv.face.LBPHFaceRecognizer_create()
 
 def predict_set(prediction_data, prediction_labels):
     fishface.read("trained.yml")
@@ -14,18 +14,19 @@ def predict_set(prediction_data, prediction_labels):
         print("** Predicting No %i **" %count)
         pred, conf = fishface.predict(image)
         if pred == prediction_labels[count]:
-            print("Correct with confidence %s" %conf)
+            print("Correct with confidence %s [%s]" %(conf, emotions[pred]))
             correct += 1
         else:
-            print("Incorrect")
+            print("Incorrect. Guessed: %s / Actual: %s" %(emotions[pred], emotions[prediction_labels[count]]))
             incorrect += 1
         count += 1
 
     return (100 * correct) / (correct + incorrect)
 
 def predict_one(image, label):
-    fishface.read("test.yml")
+    fishface.read("trained.yml")
     pred, conf = fishface.predict(image)
+    print("Guessed %s" %emotions[pred])
     if pred == label:
         print("Got it correct")
     return pred, conf

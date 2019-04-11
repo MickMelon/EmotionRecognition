@@ -4,8 +4,10 @@ import er_trainer as trainer
 import er_classifier as classifier
 import glob
 import random
+import sys
+import os
 
-emotions = ["neutral", "angry", "sad", "happy", "fear", "surprise", "disgust"]
+emotions = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
 
 
 #pp.preprocessing()
@@ -30,14 +32,14 @@ emotions = ["neutral", "angry", "sad", "happy", "fear", "surprise", "disgust"]
 # train classifier
 # classify
 
-def make_sets():
+def make_sets(sourcefolder):
     training_data = []
     training_labels = []
     prediction_data = []
     prediction_labels = []
 
     for emotion in emotions:
-        training, prediction = get_files(emotion)
+        training, prediction = get_files(sourcefolder, emotion)
 
         for item in training:
             image = cv.imread(item)
@@ -53,8 +55,8 @@ def make_sets():
         
     return training_data, training_labels, prediction_data, prediction_labels
 
-def get_files(emotion):
-    files = glob.glob("dataset/%s/*" %emotion)
+def get_files(sourcefolder, emotion):
+    files = glob.glob("%s/%s/*" %(sourcefolder, emotion))
     random.shuffle(files)
     training = files[:int(len(files) * 0.8)]
     prediction = files[-int(len(files) * 0.2):]
@@ -64,8 +66,50 @@ def get_files(emotion):
 #processor.process("mug_dataset")
 
 # Make the sets used for this
-training_data, training_labels, prediction_data, prediction_labels = make_sets()
+#training_data, training_labels, prediction_data, prediction_labels = make_sets()
 
 #trainer.train(training_data, training_labels)
-result = classifier.predict_set(prediction_data, prediction_labels)
-print("Result was %s" %result)
+#result = classifier.predict_set(prediction_data, prediction_labels)
+#print("Accuracy: %s" %result)
+#processor.process("test")
+#image = cv.imread("dataset/neutral/3.jpg")
+#gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+#result = classifier.predict_one(gray, "neutral")
+
+######
+
+def emotionsFoldersExist(folder):
+    for emotion in emotions:
+        if not os.path.isdir(folder + "/" + emotion):
+            print("ERROR: Could not find %s folder in %s" %(emotion, folder))
+            return False
+    return True
+
+if len(sys.argv) == 1:
+    print("USAGE: python er_main.py [action]")
+elif sys.argv[1] == "process":
+    if len(sys.argv) == 4:
+        source = sys.argv[2]
+        target = sys.argv[3]
+        if os.path.isdir(source) and os.path.isdir(target):            
+            if emotionsFoldersExist(source) and emotionsFoldersExist(target):
+                print("Beginning to process...")
+                processor.process(source, target) 
+                print("Processing finished!")
+        else:
+            print("ERROR: Source or target folder does not exist")
+    else:
+        print("USAGE: python er_main.py process [sourcefolder] [targetfolder]")
+elif sys.argv[1] == "train":
+    if len(sys.argv) == 3:
+        source = sys.argv[3]
+        if os.path.isdir(source):
+            training_data, training_labels, prediction_data, prediction_labels = make_sets(source)
+    #train
+elif sys.argv[1] == "predict":
+    print("Predict")
+    classifier.predict_set(data, labels)
+    #predict
+
+else:
+    print("USAGE: python er_main.py [action]")
