@@ -66,12 +66,12 @@ def get_files(sourcefolder, emotion):
 #processor.process("mug_dataset")
 
 # Make the sets used for this
-training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
+#training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
 
-trainer.train(training_data, training_labels)
-result = classifier.predict_set(prediction_data, prediction_labels)
-print("Accuracy: %s" %result)
-#processor.process("mug_dataset", "dataset")
+#trainer.train(training_data, training_labels)
+#result = classifier.predict_set(prediction_data, prediction_labels)
+#print("Accuracy: %s" %result)
+processor.process("test", "dataset")
 #image = cv.imread("dataset/neutral/3.jpg")
 #gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 #result = classifier.predict_one(gray, "neutral")
