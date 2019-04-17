@@ -1,7 +1,8 @@
 import cv2 as cv
 
 emotions = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
-fishface = cv.face.LBPHFaceRecognizer_create()
+
+fishface = cv.face.EigenFaceRecognizer_create()
 
 def predict_set(prediction_data, prediction_labels):
     fishface.read("trained.yml")
@@ -13,6 +14,7 @@ def predict_set(prediction_data, prediction_labels):
     for image in prediction_data:
         print("** Predicting No %i **" %count)
         pred, conf = fishface.predict(image)
+        print("PRED: %s | CONF: %s" %(pred, conf))
         if pred == prediction_labels[count]:
             print("Correct with confidence %s [%s]" %(conf, emotions[pred]))
             correct += 1

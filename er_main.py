@@ -63,15 +63,21 @@ def get_files(sourcefolder, emotion):
     return training, prediction
 
 # First process the original face set
-#processor.process("mug_dataset")
+processor.process("test", "dataset")
 
 # Make the sets used for this
-#training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
 
+#average = 0
+#training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
 #trainer.train(training_data, training_labels)
-#result = classifier.predict_set(prediction_data, prediction_labels)
-#print("Accuracy: %s" %result)
-processor.process("test", "dataset")
+#for i in range(0, 10):    
+#    result = classifier.predict_set(prediction_data, prediction_labels)
+#    average += result
+#    print("Accuracy: %s" %result)#
+#
+#average /= 10
+#print("Completed. Average accuracy %s " %average)
+#processor.process("mug_dataset", "dataset")
 #image = cv.imread("dataset/neutral/3.jpg")
 #gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 #result = classifier.predict_one(gray, "neutral")
