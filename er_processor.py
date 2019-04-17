@@ -13,10 +13,10 @@ eye_casecade = cv.CascadeClassifier('haarcascade_eye.xml')
 
 DESIRED_FACE_WIDTH = 150
 DESIRED_FACE_HEIGHT = 150
-DESIRED_LEFT_EYE_X = 0.16
-DESIRED_LEFT_EYE_Y = 0.14
-DESIRED_RIGHT_EYE_X = 1.0 - 0.16
-DESIRED_RIGHT_EYE_Y = 1.0 - 0.14
+DESIRED_LEFT_EYE_X = 0.22
+DESIRED_LEFT_EYE_Y = 0.2
+DESIRED_RIGHT_EYE_X = 1.0 - 0.22
+DESIRED_RIGHT_EYE_Y = 1.0 - 0.2
 
 def show_image(image):
     cv.imshow('image', image)
@@ -45,6 +45,8 @@ def detect_face(file):
         roi_gray = cv.resize(roi_gray, (DESIRED_FACE_WIDTH, DESIRED_FACE_HEIGHT))
         eyes = eye_casecade.detectMultiScale(roi_gray, scaleFactor=1.05, minNeighbors=5, minSize=(25, 25), maxSize=(30, 30))
         
+        if len(eyes) != 2:
+            return ""
 
         #cv.rectangle(frame, (x, y), (x+w, y+h), (255,0,0), 2)
         #eyeNo = 0
@@ -73,59 +75,45 @@ def detect_face(file):
 
         print("%s %s %s %s" %(rightEyeX, rightEyeY, leftEyeX, leftEyeY))
 
-        cv.circle(roi_gray, (leftEyeX, leftEyeY), 1, (255,255,0), -1)
-        cv.circle(roi_gray, (rightEyeX, rightEyeY), 1, (255,255,0), -1)
+        #cv.circle(roi_gray, (leftEyeX, leftEyeY), 1, (255,255,0), -1)
+        #cv.circle(roi_gray, (rightEyeX, rightEyeY), 1, (255,255,0), -1)
 
-        cv.line(roi_gray, (rightEyeX, rightEyeY), (leftEyeX, leftEyeY), (255,0,0),1)
+        #cv.line(roi_gray, (rightEyeX, rightEyeY), (leftEyeX, leftEyeY), (255,0,0),1)
 
         roi_gray = geometrical_transformation(roi_gray, rightEyeX, rightEyeY, leftEyeX, leftEyeY)
 
-        show_image(roi_gray)
-        sys.exit()
+        
 
         
         roi_gray = histogram_equalisation(roi_gray)
         roi_gray = smoothing(roi_gray)
-        roi_gray = cv.GaussianBlur(roi_gray, (5,5), 0)
+        #roi_gray = cv.GaussianBlur(roi_gray, (5,5), 0)
+
+        roi_gray = e_mask(roi_gray)
         #roi_gray = elliptical_mask(roi_gray)
         
-       
+        #show_image(roi_gray)
+        #sys.exit()
 
         return roi_gray
 
     print("No face detected")
     return ""
 
-def elliptical_mask(img):
+def e_mask(img):
     mask = np.zeros_like(img)
-    rows, cols = mask.shape
-    print("rows %s cols %s" %(rows, cols))
 
-    faceCenterX = round(cols * 0.5)
-    faceCenterY = round(rows * 0.5)
+    sizeX = round(150 * 0.5)
+    sizeY = round(150 * 0.8)
 
-    mask = cv.ellipse(mask, center=(faceCenterY, faceCenterX), axes=(125,175), angle=0, startAngle=0, endAngle=360, color=(255,255,255), thickness=-1)
-    result = np.bitwise_and(img, mask)
+    centerX = int(round(DESIRED_FACE_WIDTH / 2))
+    centerY = int(round(DESIRED_FACE_HEIGHT / 2))
+
+    mask = cv.ellipse(mask, center=(centerX, centerY), axes=(sizeX,sizeY), angle=0, startAngle=0, endAngle=360, color=(255,255,255), thickness=-1)
+    np.bitwise_and(img, mask)
 
     img[mask == 0] = 128
-
     return img
-
-def e_mask(img):
-    mask = np.zeros((DESIRED_FACE_WIDTH, DESIRED_FACE_HEIGHT), np.uint8)
-
-    rows, cols = mask.shape
-    faceCenterX = round(cols * 0.5)
-    faceCenterY = round(rows * 0.5)
-    mask = cv.ellipse(mask, center=(faceCenterY, faceCenterX), axes=(125,175), angle=0, startAngle=0, endAngle=360, color=(0,255,0), thickness=-1)
-   # mask = cv.ellipse(mask,(130,130),(100,50),0,0,180,255,-1)
-    #result = np.bitwise_and(img, mask)
-    show_image(mask)
-
-    #img[mask == 0] = 128
-    print("t")
-
-    return mask
 
 def smoothing(img):
     return cv.bilateralFilter(img, 0, 20, 20)
@@ -187,7 +175,7 @@ def geometrical_transformation(gray, rightEyeX, rightEyeY, leftEyeX, leftEyeY):
     eyesCenterX = (leftEyeX + rightEyeX) * 0.5
     eyesCenterY = (leftEyeY + rightEyeY) * 0.5
 
-    cv.circle(gray, (int(eyesCenterX), int(eyesCenterY)), 1, (255,255,0), -1)
+    #cv.circle(gray, (int(eyesCenterX), int(eyesCenterY)), 1, (255,255,0), -1)
 
     # Get the angle between the two eyes
     dy = rightEyeY - leftEyeY
@@ -199,9 +187,8 @@ def geometrical_transformation(gray, rightEyeX, rightEyeY, leftEyeX, leftEyeY):
     desiredLength = (DESIRED_RIGHT_EYE_X - 0.16)
     scale = desiredLength * DESIRED_FACE_WIDTH / length
 
-    print(scale)
     # Get transformation matrix for desired angle and size
-    rotationMatrix = cv.getRotationMatrix2D((eyesCenterX, eyesCenterY), angle, scale)
+    rotationMatrix = cv.getRotationMatrix2D((eyesCenterX, eyesCenterY), angle, 1.5)
     ex = DESIRED_FACE_WIDTH * 0.5 - eyesCenterX
     ey = DESIRED_FACE_HEIGHT * DESIRED_LEFT_EYE_Y - eyesCenterY
     rotationMatrix[0,2] += ex

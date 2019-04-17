@@ -2,10 +2,8 @@ import cv2 as cv
 
 emotions = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
 
-fishface = cv.face.EigenFaceRecognizer_create()
-
-def predict_set(prediction_data, prediction_labels):
-    fishface.read("trained.yml")
+def predict_set(facerecogniser, prediction_data, prediction_labels):
+    facerecogniser.read("trained.yml")
 
     count = 0
     correct = 0
@@ -13,7 +11,7 @@ def predict_set(prediction_data, prediction_labels):
 
     for image in prediction_data:
         print("** Predicting No %i **" %count)
-        pred, conf = fishface.predict(image)
+        pred, conf = facerecogniser.predict(image)
         print("PRED: %s | CONF: %s" %(pred, conf))
         if pred == prediction_labels[count]:
             print("Correct with confidence %s [%s]" %(conf, emotions[pred]))
@@ -25,9 +23,9 @@ def predict_set(prediction_data, prediction_labels):
 
     return (100 * correct) / (correct + incorrect)
 
-def predict_one(image, label):
-    fishface.read("trained.yml")
-    pred, conf = fishface.predict(image)
+def predict_one(facerecogniser, image, label):
+    facerecogniser.read("trained.yml")
+    pred, conf = facerecogniser.predict(image)
     print("Guessed %s" %emotions[pred])
     if pred == label:
         print("Got it correct")

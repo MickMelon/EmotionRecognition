@@ -63,20 +63,25 @@ def get_files(sourcefolder, emotion):
     return training, prediction
 
 # First process the original face set
-processor.process("test", "dataset")
-
 # Make the sets used for this
 
-#average = 0
-#training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
-#trainer.train(training_data, training_labels)
-#for i in range(0, 10):    
-#    result = classifier.predict_set(prediction_data, prediction_labels)
-#    average += result
-#    print("Accuracy: %s" %result)#
-#
-#average /= 10
-#print("Completed. Average accuracy %s " %average)
+def test():
+    facerecogniser = cv.face.LBPHFaceRecognizer_create()
+    average = 0
+
+    for i in range(10):    
+        training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
+        trainer.train(facerecogniser, training_data, training_labels)
+        result = classifier.predict_set(facerecogniser, prediction_data, prediction_labels)
+        average += result
+        print("Accuracy: %s" %result)#
+
+    average /= 10
+    print("Completed. Average accuracy %s " %average)
+
+test()
+#processor.process("mug_dataset", "dataset")
+
 #processor.process("mug_dataset", "dataset")
 #image = cv.imread("dataset/neutral/3.jpg")
 #gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
