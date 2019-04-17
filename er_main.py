@@ -7,54 +7,40 @@ import random
 import sys
 import os
 
-emotions = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
+# The emotions used for emotion recognition.
+EMOTIONS = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
 
-
-#pp.preprocessing()
-#prediction_data, prediction_labels = l.run()
-#result = c.predict(prediction_data, prediction_labels)
-#print("Completed! Result was %i" %result)
-
-#image = pp.one("009_su_003_0023.jpg")
-#pred, conf = c.predict_one(image)
-#print("Predicted %s with %s confidence" %(emotions[pred], conf))
-
-# get face from image and crop and gray it
-# do this for all 
-
-# get all the images
-#   for every image
-#   preprocesser.process
-#       detect
-#       processimage
-# 
-# split images into training and prediction
-# train classifier
-# classify
-
+# Makes training and prediction sets along with labels for all the emotion 
+# pictures in the specified sourcefolder. 
 def make_sets(sourcefolder):
     training_data = []
     training_labels = []
     prediction_data = []
     prediction_labels = []
 
-    for emotion in emotions:
+    for emotion in EMOTIONS:
         training, prediction = get_files(sourcefolder, emotion)
 
+        # For every training image, convert it to grayscale and add it to the training data
+        # array along with an entry to the training labels array indicating the emotion.
         for item in training:
             image = cv.imread(item)
             gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
             training_data.append(gray)
-            training_labels.append(emotions.index(emotion))
+            training_labels.append(EMOTIONS.index(emotion))
 
+        # For every prediction image, convert it to grayscale and add it to the prediction data
+        # array along with an entry to the prediction labels array indicating the emotion.
         for item in prediction:
             image = cv.imread(item)
             gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
             prediction_data.append(gray)
-            prediction_labels.append(emotions.index(emotion))
+            prediction_labels.append(EMOTIONS.index(emotion))
         
     return training_data, training_labels, prediction_data, prediction_labels
 
+# Gets all the files for a given emotion in the given folder and splits them into training and 
+# prediction sets, 80% and 20% respectively.
 def get_files(sourcefolder, emotion):
     files = glob.glob("%s/%s/*" %(sourcefolder, emotion))
     random.shuffle(files)
@@ -62,9 +48,7 @@ def get_files(sourcefolder, emotion):
     prediction = files[-int(len(files) * 0.2):]
     return training, prediction
 
-# First process the original face set
-# Make the sets used for this
-
+# Testing
 def test():
     facerecogniser = cv.face.LBPHFaceRecognizer_create()
     average = 0
@@ -81,48 +65,3 @@ def test():
 
 test()
 #processor.process("mug_dataset", "dataset")
-
-#processor.process("mug_dataset", "dataset")
-#image = cv.imread("dataset/neutral/3.jpg")
-#gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-#result = classifier.predict_one(gray, "neutral")
-
-######
-
-#cv.EYE_SX
-#
-#def emotionsFoldersExist(folder):
-#    for emotion in emotions:
-#        if not os.path.isdir(folder + "/" + emotion):
-#            print("ERROR: Could not find %s folder in %s" %(emotion, folder))
-#            return False
-#    return True#
-#
-#if len(sys.argv) == 1:
-#    print("USAGE: python er_main.py [action]")
-#elif sys.argv[1] == "process":
-#    if len(sys.argv) == 4:
-#        source = sys.argv[2]
-#        target = sys.argv[3]
-#        if os.path.isdir(source) and os.path.isdir(target):            
-#            if emotionsFoldersExist(source) and emotionsFoldersExist(target):
-#                print("Beginning to process...")
-#                processor.process(source, target) 
-#                print("Processing finished!")
-#        else:
-#            print("ERROR: Source or target folder does not exist")
-#    else:
-#        print("USAGE: python er_main.py process [sourcefolder] [targetfolder]")
-#elif sys.argv[1] == "train":
-#    if len(sys.argv) == 3:
-#        source = sys.argv[3]
-#        if os.path.isdir(source):
-#            training_data, training_labels, prediction_data, prediction_labels = make_sets(source)
-#    #train
-#elif sys.argv[1] == "predict":
-#    print("Predict")
-#    classifier.predict_set(data, labels)
-#    #predict
-##
-#else:
-#   print("USAGE: python er_main.py [action]")
