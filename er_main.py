@@ -6,6 +6,7 @@ import glob
 import random
 import sys
 import os
+import time
 
 # The emotions used for emotion recognition.
 EMOTIONS = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
@@ -52,16 +53,35 @@ def get_files(sourcefolder, emotion):
 def test():
     facerecogniser = cv.face.LBPHFaceRecognizer_create()
     average = 0
+    loops = 10
 
-    for i in range(10):    
+    for i in range(loops):   
+        start = time.time()
         training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
         trainer.train(facerecogniser, training_data, training_labels)
+        end = time.time()
+
+        totaltraintime = end - start
+
+        start = time.time()
         result = classifier.predict_set(facerecogniser, prediction_data, prediction_labels)
+        end = time.time()
+
+        totalpredicttime = end - start
+        print("Training took %s on %s files and Prediction took %s on %s files " %(totaltraintime, len(training_data), totalpredicttime, len(prediction_data)))
         average += result
-        print("Accuracy: %s" %result)#
+        print("Prediction Accuracy: %s%%" %round(result))#
 
-    average /= 10
-    print("Completed. Average accuracy %s " %average)
+    average /= loops
+    average = round(average)
+    print("Completed. Average accuracy %s%% " %average)
 
+def process():
+    start = time.time()
+    processor.run_processor("mug_dataset", "dataset")
+    end = time.time()
+    totaltime = end - start
+    print("Processing took %s" %totaltime)
+
+process()
 test()
-#processor.process("mug_dataset", "dataset")
