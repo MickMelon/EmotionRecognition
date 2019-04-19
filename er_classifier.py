@@ -136,10 +136,10 @@ def predict_one(facerecogniser, image, label):
     print("Guessed %s" %EMOTIONS[pred])
 
     # Check if the prediction was correct.
-    if pred == label:
+    if EMOTIONS[pred] == label:
         print("Got it correct")
-        return True
+        return True, EMOTIONS[pred]
 
     # The prediction wasn't correct if the code gets here.
-    return False
+    return False, EMOTIONS[pred]
 

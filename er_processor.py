@@ -17,10 +17,10 @@ eye_casecade = cv.CascadeClassifier('haarcascade_eye.xml')
 # Constant variables to specify desired values.
 DESIRED_FACE_WIDTH = 150
 DESIRED_FACE_HEIGHT = 150
-DESIRED_LEFT_EYE_X = 0.22
-DESIRED_LEFT_EYE_Y = 0.3
-DESIRED_RIGHT_EYE_X = 1.0 - 0.22
-DESIRED_RIGHT_EYE_Y = 1.0 - 0.3
+DESIRED_LEFT_EYE_X = 0.20
+DESIRED_LEFT_EYE_Y = 0.26
+DESIRED_RIGHT_EYE_X = 1.0 - 0.20
+DESIRED_RIGHT_EYE_Y = 1.0 - 0.26
 
 # Shows the specified image in a window.
 def show_image(image):
@@ -36,9 +36,9 @@ def load_images(folder, emotion):
 def process(file):
     # Read the image and convert it to grayscale
     image = cv.imread(file)
-    #cv.imwrite("test/1.jpg", image)
+    cv.imwrite("test/1_original.jpg", image)
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    #cv.imwrite("test/2.jpg", gray)
+    cv.imwrite("test/2_gray.jpg", gray)
     # Detect a face in the image
     face = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=5, minSize=(30, 30), flags=cv.CASCADE_SCALE_IMAGE)
 
@@ -50,10 +50,10 @@ def process(file):
         # Crop the face from the original image and resize it to the desired width and height.
         roi_gray = gray[y:y+h, x:x+w]
         roi_gray = cv.resize(roi_gray, (DESIRED_FACE_WIDTH, DESIRED_FACE_HEIGHT))
-        #cv.imwrite("test/3.jpg", roi_gray)
+        cv.imwrite("test/3_croppedface.jpg", roi_gray)
 
         # Detect eyes in the cropped face image.
-        eyes = eye_casecade.detectMultiScale(roi_gray, scaleFactor=1.05, minNeighbors=10, minSize=(25, 25), maxSize=(30, 30))
+        eyes = eye_casecade.detectMultiScale(roi_gray, scaleFactor=1.05, minNeighbors=10, minSize=(20, 20), maxSize=(35, 35))
 
         #eyeNo = 0
         #lol = 255
@@ -86,18 +86,20 @@ def process(file):
 
             # Perform pre-processing steps on the image.
             roi_gray = geometrical_transformation(roi_gray, rightEyeX, rightEyeY, leftEyeX, leftEyeY)
-            #cv.imwrite("test/4.jpg", roi_gray)
+            cv.imwrite("test/4_geo.jpg", roi_gray)
             roi_gray = histogram_equalisation(roi_gray)
-            #cv.imwrite("test/5.jpg", roi_gray)
+            cv.imwrite("test/5_histo.jpg", roi_gray)
             roi_gray = smoothing(roi_gray)
-            #cv.imwrite("test/6.jpg", roi_gray)
+            cv.imwrite("test/6_smooth.jpg", roi_gray)
             roi_gray = elliptical_mask(roi_gray)
-            #cv.imwrite("test/7.jpg", roi_gray)
+            cv.imwrite("test/7_mask.jpg", roi_gray)
 
             #sys.exit()
 
             # Return the fully pre-processed face image.
             roi_gray = cv.resize(roi_gray, (70, 70))
+            cv.imwrite("test/8_finalresize.jpg", roi_gray)
+            #sys.exit()
             return roi_gray
 
     # No face or eyes were detected, so return an empty string to indicate this.
@@ -133,6 +135,9 @@ def elliptical_mask(image):
 # strength of 20 was chosen to cover heavy pixel noise caused by histogram equalisation.
 def smoothing(image):
     return cv.bilateralFilter(image, 0, 20, 20)
+
+def gaussian_blur(image):
+    return cv.GaussianBlur(image, (5,5), 0)
 
 # Perform histogram equalisation on the input image to standardise the brightness and contrast.
 def histogram_equalisation(image):
@@ -173,6 +178,16 @@ def geometrical_transformation(gray, rightEyeX, rightEyeY, leftEyeX, leftEyeY):
 
     # Transform the face to the desired angle, size, and position. 
     return cv.warpAffine(gray, rotationMatrix, (DESIRED_FACE_WIDTH, DESIRED_FACE_HEIGHT))
+
+def process_one(file):
+    print("here")
+    result = process(file)
+    if result == "":
+        print("File %s could not be processed." %file)
+        return ""
+    
+    cv.imwrite("test/processed.png", result)
+    print("File %s processed successfully" %file)
 
 # Runs the processor.
 def run_processor(sourcefolder, targetfolder):
