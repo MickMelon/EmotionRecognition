@@ -36,12 +36,7 @@ def load_images(folder, emotion):
 def process(file):
     # Read the image and convert it to grayscale
     image = cv.imread(file)
-    cv.imwrite("test/1_original.jpg", image)
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    cv.imwrite("test/2_gray.jpg", gray)
-
-    gray = cv.resize(gray, (70, 70))
-    return gray
 
     # Detect a face in the image
     face = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=5, minSize=(30, 30), flags=cv.CASCADE_SCALE_IMAGE)
@@ -54,22 +49,9 @@ def process(file):
         # Crop the face from the original image and resize it to the desired width and height.
         roi_gray = gray[y:y+h, x:x+w]
         roi_gray = cv.resize(roi_gray, (DESIRED_FACE_WIDTH, DESIRED_FACE_HEIGHT))
-        cv.imwrite("test/3_croppedface.jpg", roi_gray)
 
         # Detect eyes in the cropped face image.
         eyes = eye_casecade.detectMultiScale(roi_gray, scaleFactor=1.05, minNeighbors=10, minSize=(20, 20), maxSize=(35, 35))
-
-        #eyeNo = 0
-        #lol = 255
-        #for (ex,ey,ew,eh) in eyes:
-        #    roi_eye = gray[y:ey+eh, x:ex+ew]
-        #    print("eye %s ex %s ey %s lol %s" %(eyeNo, ex, ey, lol))
-        #    cv.rectangle(roi_gray, (ex, ey), (ex+ew, ey+eh), (lol,lol,lol), 2)
-        #    eyeNo += 1
-        #    lol = 0
-
-        #show_image(roi_gray)
-        #sys.exit()
         
         # Check if two eyes were found
         if len(eyes) == 2:
@@ -90,20 +72,12 @@ def process(file):
 
             # Perform pre-processing steps on the image.
             roi_gray = geometrical_transformation(roi_gray, rightEyeX, rightEyeY, leftEyeX, leftEyeY)
-            cv.imwrite("test/4_geo.jpg", roi_gray)
             roi_gray = histogram_equalisation(roi_gray)
-            cv.imwrite("test/5_histo.jpg", roi_gray)
             roi_gray = smoothing(roi_gray)
-            cv.imwrite("test/6_smooth.jpg", roi_gray)
             roi_gray = elliptical_mask(roi_gray)
-            cv.imwrite("test/7_mask.jpg", roi_gray)
-
-            #sys.exit()
 
             # Return the fully pre-processed face image.
             roi_gray = cv.resize(roi_gray, (70, 70))
-            cv.imwrite("test/8_finalresize.jpg", roi_gray)
-            #sys.exit()
             return roi_gray
 
     # No face or eyes were detected, so return an empty string to indicate this.
@@ -197,10 +171,10 @@ def process_one(file):
 def run_processor(sourcefolder, targetfolder):
     totaltime = 0
     totalfiles = 0
-
     errorcount = 0
 
     for emotion in EMOTIONS:
+        # Load all the images for the given emotion
         print("Processing emotion %s" %emotion)
         images = load_images(sourcefolder, emotion)
         if len(images) == 0:
@@ -210,21 +184,28 @@ def run_processor(sourcefolder, targetfolder):
         for file in images:
             start = time.time()
 
+            # Process the file
             print("Processing file %s" %file)
             result = process(file)
+
+            # Check if the file processed successfully
             if result == "": 
                 print("File %s could not be processed." %file)
                 errorcount += 1
                 continue
+
+            # If the file processed successfully, save it
             cv.imwrite("%s/%s/%s.png" %(targetfolder, emotion, fileNumber), result)
             print("File %s processed successfully" %file)
             fileNumber += 1
             totalfiles += 1
 
+            # Calculate time taken to perform pre-processing.
             end = time.time()
             timetaken = end - start
             totaltime += timetaken
 
+    # Print the results
     average = totaltime / totalfiles
     print("%s processed, Average time per image processed %s" %(totalfiles, average))
     print("Failed to process %s images" %errorcount)

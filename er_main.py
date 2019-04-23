@@ -11,6 +11,9 @@ import time
 # The emotions used for emotion recognition.
 EMOTIONS = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
 
+# The instance of the FaceRecognizer class used for training and prediction.
+facerecogniser = cv.face.LBPHFaceRecognizer_create()
+
 # Makes training and prediction sets along with labels for all the emotion 
 # pictures in the specified sourcefolder. 
 def make_sets(sourcefolder):
@@ -27,6 +30,7 @@ def make_sets(sourcefolder):
         for item in training:
             image = cv.imread(item)
             gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+
             training_data.append(gray)
             training_labels.append(EMOTIONS.index(emotion))
 
@@ -35,6 +39,7 @@ def make_sets(sourcefolder):
         for item in prediction:
             image = cv.imread(item)
             gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+            
             prediction_data.append(gray)
             prediction_labels.append(EMOTIONS.index(emotion))
         
@@ -49,6 +54,8 @@ def get_files(sourcefolder, emotion):
     prediction = files[-int(len(files) * 0.2):]
     return training, prediction
 
+# Makes a training set from all the images in the source folder. In contrast to make_sets() that
+# makes sets for 80/20 training and prediction.
 def make_full_training_set(sourcefolder):
     data = []
     labels = []
@@ -63,50 +70,8 @@ def make_full_training_set(sourcefolder):
 
     return data, labels
 
-# Testing
-def test():
-    facerecogniser = cv.face.LBPHFaceRecognizer_create()
-    average = 0
-    loops = 10
-
-    for i in range(loops):   
-        start = time.time()
-        training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
-        trainer.train(facerecogniser, training_data, training_labels)
-        end = time.time()
-
-        totaltraintime = end - start
-
-        start = time.time()
-        result = classifier.predict_set(facerecogniser, prediction_data, prediction_labels)
-        end = time.time()
-
-        totalpredicttime = end - start
-        print("Training took %s on %s files and Prediction took %s on %s files " %(totaltraintime, len(training_data), totalpredicttime, len(prediction_data)))
-        average += result
-        print("Prediction Accuracy: %s%%" %round(result))#
-
-    average /= loops
-    average = round(average)
-    print("Completed. Average accuracy %s%% " %average)
-
-def process():
-    start = time.time()
-    processor.run_processor("mug_dataset", "dataset")
-    end = time.time()
-    totaltime = end - start
-    print("Processing took %s" %totaltime)
-
-#process()
-#test()
-
-
-##
-
-facerecogniser = cv.face.LBPHFaceRecognizer_create()
-
+# Main Menu
 choice = ""
-
 while choice != "exit":
     print("# Emotion Recognition #")
     print("1. Process dataset")
@@ -146,23 +111,28 @@ while choice != "exit":
 
         average = 0
         
+        # Loop for as many times as specified. For each loop, make sets from the specified dataset
+        # folder, train, then predict, all while timing how long it takes.
         for i in range(loops):   
+            # Training
             start = time.time()
-            training_data, training_labels, prediction_data, prediction_labels = make_sets("dataset")
+            training_data, training_labels, prediction_data, prediction_labels = make_sets(dataset)
             trainer.train(facerecogniser, training_data, training_labels)
             end = time.time()
-
             totaltraintime = end - start
 
+            # Prediction
             start = time.time()
             result = classifier.predict_set(facerecogniser, prediction_data, prediction_labels)
             end = time.time()
 
+            # Display the results from the loop
             totalpredicttime = end - start
             print("Training took %s on %s files and Prediction took %s on %s files " %(totaltraintime, len(training_data), totalpredicttime, len(prediction_data)))
             average += result
             print("Prediction Accuracy: %s%%" %round(result))#
 
+        # Display the overall results
         average /= loops
         average = round(average)
         print("Completed. Average accuracy %s%% " %average)
@@ -173,10 +143,13 @@ while choice != "exit":
         print("Enter emotion >>")
         emotion = input()
 
+        # Process the input image
         processor.process_one(location)
         processed = cv.imread("test/processed.png")
         processed = cv.cvtColor(processed, cv.COLOR_BGR2GRAY)
         print("Finish process")
+
+        # Predict the input image and print the result
         result, pred = classifier.predict_one(facerecogniser, processed, emotion)
         if result:
             print("Correct")

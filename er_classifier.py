@@ -4,78 +4,80 @@ import sys
 # The emotions defined for emotion recognition.
 EMOTIONS = ["neutral", "anger", "sadness", "happy", "fear", "surprise", "disgust"]
 
-neutralw = 0
-angerw = 0
-sadnessw = 0
-happyw = 0
-fearw = 0
-surprisew = 0
-disgustw = 0
+# The count of all the wrong guesses
+neutral_wrong = 0
+anger_wrong = 0
+sadness_wrong = 0
+happy_wrong = 0
+fear_wrong = 0
+surprise_wrong = 0
+disgust_wrong = 0
 
-neutralt = 0
-angert = 0
-sadnesst = 0
-happyt = 0
-feart = 0
-surpriset = 0
-disgustt = 0
+# The total of each emotion in the prediction set
+neutral_total = 0
+anger_total = 0
+sadness_total = 0
+happy_total = 0
+fear_total = 0
+surprise_total = 0
+disgust_total = 0
 
+# Add plus one to the wrong count for the given emotion
 def countwrong(emotion):
-    global neutralw, angerw, sadnessw, happyw, fearw, surprisew, disgustw
+    global neutral_wrong, anger_wrong, sadness_wrong, happy_wrong, fear_wrong, surprise_wrong, disgust_wrong
 
     if emotion == "neutral":
-        neutralw += 1
+        neutral_wrong += 1
     elif emotion == "anger":
-        angerw += 1
+        anger_wrong += 1
     elif emotion == "sadness":
-        sadnessw += 1
+        sadness_wrong += 1
     elif emotion == "happy":
-        happyw += 1
+        happy_wrong += 1
     elif emotion == "fear":
-        fearw += 1
+        fear_wrong += 1
     elif emotion == "surprise":
-        surprisew += 1
+        surprise_wrong += 1
     elif emotion == "disgust":
-        disgustw += 1
+        disgust_wrong += 1
 
+# Get the total amount of faces for each emotion in the prediction set.
 def totalforeachemotion(prediction_labels):
-    global neutralt, angert, sadnesst, happyt, feart, surpriset, disgustt
+    global neutral_total, anger_total, sadness_total, happy_total, fear_total, surprise_total, disgust_total
 
     for label in prediction_labels:
         if EMOTIONS[label] == "neutral":
-            neutralt += 1
+            neutral_total += 1
         elif EMOTIONS[label] == "anger":
-            angert += 1
+            anger_total += 1
         elif EMOTIONS[label] == "sadness":
-            sadnesst += 1
+            sadness_total += 1
         elif EMOTIONS[label] == "happy":
-            happyt += 1
+            happy_total += 1
         elif EMOTIONS[label] == "fear":
-            feart += 1
+            fear_total += 1
         elif EMOTIONS[label] == "surprise":
-            surpriset += 1
+            surprise_total += 1
         elif EMOTIONS[label] == "disgust":
-            disgustt += 1
+            disgust_total += 1
 
+# Print the results from the prediction.
 def printresults():
-    #global neutralt, angert, sadnesst, happyt, feart, surpriset, disgustt
-    #global neutralw, angerw, sadnessw, happyw, fearw, surprisew, disgustw
-
-    neutralp = round((neutralw / neutralt) * 100)
-    angerp = round((angerw / angert) * 100)
-    sadnessp = round((sadnessw / sadnesst) * 100)
-    happyp = round((happyw / happyt) * 100)
-    fearp = round((fearw / feart) * 100)
-    surprisep = round((surprisew / surpriset) * 100)
-    disgustp = round((disgustw / disgustt) * 100)
+    neutralp = round((neutral_wrong / neutral_total) * 100)
+    angerp = round((anger_wrong / anger_total) * 100)
+    sadnessp = round((sadness_wrong / sadness_total) * 100)
+    happyp = round((happy_wrong / happy_total) * 100)
+    fearp = round((fear_wrong / fear_total) * 100)
+    surprisep = round((surprise_wrong / surprise_total) * 100)
+    disgustp = round((disgust_wrong / disgust_total) * 100)
     
-    print("Neutral: %s of %s incorrect (%s%%)" %(neutralw, neutralt, neutralp))
-    print("Anger: %s of %s incorrect (%s%%)" %(angerw, angert, angerp))
-    print("Sadness: %s of %s incorrect (%s%%)" %(sadnessw, sadnesst, sadnessp))
-    print("Happy: %s of %s incorrect (%s%%)" %(happyw, happyt, happyp))
-    print("Fear: %s of %s incorrect (%s%%)" %(fearw, feart, fearp))
-    print("Surprise: %s of %s incorrect (%s%%)" %(surprisew, surpriset, surprisep))
-    print("Disgust: %s of %s incorrect (%s%%)" %(disgustw, disgustt, disgustp))
+    print("Neutral: %s of %s incorrect (%s%%)" %(neutral_wrong, neutral_total, neutralp))
+    print("Anger: %s of %s incorrect (%s%%)" %(anger_wrong, anger_total, angerp))
+    print("Sadness: %s of %s incorrect (%s%%)" %(sadness_wrong, sadness_total, sadnessp))
+    print("Happy: %s of %s incorrect (%s%%)" %(happy_wrong, happy_total, happyp))
+    print("Fear: %s of %s incorrect (%s%%)" %(fear_wrong, fear_total, fearp))
+    print("Surprise: %s of %s incorrect (%s%%)" %(surprise_wrong, surprise_total, surprisep))
+    print("Disgust: %s of %s incorrect (%s%%)" %(disgust_wrong, disgust_total, disgustp))
 
 # Predicts a set of data with the given data and labels.
 #
@@ -90,23 +92,23 @@ def predict_set(facerecogniser, prediction_data, prediction_labels):
     correct = 0
     incorrect = 0
 
-    neutralw = 0
-    angerw = 0
-    sadnessw = 0
-    happyw = 0
-    fearw = 0
-    surprisew = 0
-    disgustw = 0
+    # Ensure all the wrong variables are set to 0
+    neutral_wrong = 0
+    anger_wrong = 0
+    sadness_wrong = 0
+    happy_wrong = 0
+    fear_wrong = 0
+    surprise_wrong = 0
+    disgust_wrong = 0
 
-    neutralt = 0
-    angert = 0
-    sadnesst = 0
-    happyt = 0
-    feart = 0
-    surpriset = 0
-    disgustt = 0
-
-   # sys.exit()
+    # Ensure all the total variables are set to 0
+    neutral_total = 0
+    anger_total = 0
+    sadness_total = 0
+    happy_total = 0
+    fear_total = 0
+    surprise_total = 0
+    disgust_total = 0
 
     # Begin predicting each image in the array.
     for image in prediction_data:
