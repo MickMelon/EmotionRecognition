@@ -39,6 +39,10 @@ def process(file):
     cv.imwrite("test/1_original.jpg", image)
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     cv.imwrite("test/2_gray.jpg", gray)
+
+    gray = cv.resize(gray, (70, 70))
+    return gray
+
     # Detect a face in the image
     face = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=5, minSize=(30, 30), flags=cv.CASCADE_SCALE_IMAGE)
 

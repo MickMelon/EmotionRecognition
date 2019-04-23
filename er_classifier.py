@@ -90,6 +90,22 @@ def predict_set(facerecogniser, prediction_data, prediction_labels):
     correct = 0
     incorrect = 0
 
+    neutralw = 0
+    angerw = 0
+    sadnessw = 0
+    happyw = 0
+    fearw = 0
+    surprisew = 0
+    disgustw = 0
+
+    neutralt = 0
+    angert = 0
+    sadnesst = 0
+    happyt = 0
+    feart = 0
+    surpriset = 0
+    disgustt = 0
+
    # sys.exit()
 
     # Begin predicting each image in the array.
@@ -137,7 +153,6 @@ def predict_one(facerecogniser, image, label):
 
     # Check if the prediction was correct.
     if EMOTIONS[pred] == label:
-        print("Got it correct")
         return True, EMOTIONS[pred]
 
     # The prediction wasn't correct if the code gets here.
